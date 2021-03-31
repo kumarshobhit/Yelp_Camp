@@ -1,0 +1,28 @@
+body{
+    height: 100vh;
+    background-image:
+                  url("../pics/home.jpg") ;
+                  background-position: center; 
+                  background-repeat: no-repeat; 
+             background-size: cover;             
+}
+
+.nav-link{
+    margin-left: 1rem;
+    font-weight: 700;
+    color: rgba(255,255,255,0.5);
+    border-bottom: 0.25rem solid transparent;
+}
+
+.nav-link:hover{
+    color: rgba(255,255,255,0.5);
+    border-bottom-color:rgba(255,255,255,0.5);
+}
+
+.active .nav-link{
+    border-bottom-color:white
+}
+
+.content{
+    color: white;
+}
