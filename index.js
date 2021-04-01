@@ -19,7 +19,7 @@ const userRoutes = require('./routes/users.js')
 const { getMaxListeners } = require('process')
 const cloudDb = process.env.DB_ATLAS;
 // const session = require('express-session');
-const MongoStore = require('connect-mongo');
+const MongoDBStore = require("connect-mongo")(session);
 
 
 mongoose.connect(cloudDb || 'mongodb://localhost:27017/yelp-camp', {
@@ -37,20 +37,30 @@ db.once("open", () => {
 });
 
 
+const store = new MongoDBStore({
+    url: cloudDb,
+    secret: "shoud a be a secret",
+    touchAfter: 24 * 60 * 60
+});
+
+store.on("error", function (e) {
+    console.log("SESSION STORE ERROR", e)
+})
+
 const sessionConfig = {
-    secret: process.env.DB_SECRET || 'keyboard cat',
-    saveUninitialized: false, // don't create session until something stored
-    resave: false, //don't save session if unmodified
-    store: MongoStore.create({
-        mongoUrl: 'mongodb://localhost:27017/yelp-camp',
-        touchAfter: 24 * 3600 // time period in seconds
-    }),
+    store,
+    name: 'session',
+    secret: "should be a secret",
+    resave: false,
+    saveUninitialized: true,
     cookie: {
         httpOnly: true,
+        // secure: true,
         expires: Date.now() + 1000 * 60 * 60 * 24 * 7,
         maxAge: 1000 * 60 * 60 * 24 * 7
     }
 }
+
 
 app.use(session(sessionConfig));
 app.use(flash());
