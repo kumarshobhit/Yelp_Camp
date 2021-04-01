@@ -39,7 +39,7 @@ db.once("open", () => {
 
 const store = new MongoDBStore({
     url: cloudDb,
-    secret: "shoud a be a secret",
+    secret: "should be a secret",
     touchAfter: 24 * 60 * 60
 });
 
