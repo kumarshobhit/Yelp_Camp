@@ -8,11 +8,9 @@ const WrapAsync = require('../utils/ErrorHandle.js')
 const multer = require('multer')
 const { storage, cloudinary } = require('../cloudinary')
 const upload = multer({ storage })
-var geo = require('mapbox-geocoding');
-geo.setAccessToken('pk.eyJ1Ijoic2hvYmhpdGtyIiwiYSI6ImNrbW9mNGhrMDIzdTIybm1pOWxsazNremUifQ.7eP9sW_LO7_edqthxGNZfQ');
 
 const mbxGeocoding = require("@mapbox/mapbox-sdk/services/geocoding");
-const { valid } = require('joi');
+// const { valid } = require('joi');
 const mapBoxToken = process.env.MAPBOX_TOKEN;
 const geocoder = mbxGeocoding({ accessToken: mapBoxToken });
 
@@ -32,18 +30,17 @@ router.get('/new', isLoggedIn, async (req, res) => {
 router.post('/', isLoggedIn, upload.array('image'), validateCampground, WrapAsync(async (req, res) => {
     const newProduct = new CampGround(req.body.campground)
     newProduct.author = req.user._id
-    console.log(newProduct)
+
     for (let img of req.files) {
         newProduct.images.push({ url: img.path, filename: img.originalname })
     }
-    console.log(newProduct)
+
     const geoData = await geocoder.forwardGeocode({
         query: req.body.campground.location,
         limit: 1
     }).send()
     newProduct.geometry = geoData.body.features[0].geometry;
     await newProduct.save()
-    console.log(newProduct)
     req.flash('success', 'created a new camground');
     res.redirect(`/campgrounds/${newProduct._id}`)
 
@@ -74,6 +71,11 @@ router.put('/:id', isLoggedIn, isAuth, upload.array('image'), validateCampground
     for (let img of req.files) {
         camp.images.push({ url: img.path, filename: img.originalname })
     }
+    const geoData = await geocoder.forwardGeocode({
+        query: req.body.campground.location,
+        limit: 1
+    }).send()
+    camp.geometry = geoData.body.features[0].geometry;
     await camp.save()
     if (req.body.deleteImages) {
         for (let filename of req.body.deleteImages) {
@@ -81,6 +83,7 @@ router.put('/:id', isLoggedIn, isAuth, upload.array('image'), validateCampground
         }
         await camp.updateOne({ $pull: { images: { filename: { $in: req.body.deleteImages } } } })
     }
+
     req.flash('success', 'updated the  camground');
     res.redirect(`/campgrounds/${camp._id}`)
 
