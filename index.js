@@ -1,4 +1,8 @@
-require('dotenv').config()
+// require('dotenv').config()
+f(process.env.NODE_ENV !== "production") {
+    require('dotenv').config();
+}
+
 
 const express = require('express')
 const app = express()
@@ -12,17 +16,17 @@ const LocalStrategy = require('passport-local');
 const User = require('./models/user');
 const session = require('express-session')
 const flash = require('connect-flash')
-
 const campgroundRoutes = require('./routes/campgrounds.js')
 const reviewRoutes = require('./routes/reviews.js')
 const userRoutes = require('./routes/users.js')
-const { getMaxListeners } = require('process')
-const cloudDb = process.env.DB_ATLAS;
-// const session = require('express-session');
+
+// const cloudDb = process.env.DB_ATLAS;
+const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
+
 const MongoDBStore = require("connect-mongo")(session);
 
 
-mongoose.connect(cloudDb || 'mongodb://localhost:27017/yelp-camp', {
+mongoose.connect(dbUrl, {
     useNewUrlParser: true,
     useCreateIndex: true,
     useUnifiedTopology: true,
@@ -36,10 +40,11 @@ db.once("open", () => {
     console.log("Database connected");
 });
 
+const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
 
 const store = new MongoDBStore({
-    url: cloudDb,
-    secret: "should be a secret",
+    url: dbUrl,
+    secret,
     touchAfter: 24 * 60 * 60
 });
 
@@ -50,7 +55,7 @@ store.on("error", function (e) {
 const sessionConfig = {
     store,
     name: 'session',
-    secret: "should be a secret",
+    secret,
     resave: false,
     saveUninitialized: true,
     cookie: {
