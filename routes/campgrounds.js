@@ -64,7 +64,7 @@ router.get('/:id/edit', isLoggedIn, isAuth, WrapAsync(async (req, res) => {
 
 
 router.put('/:id', isLoggedIn, isAuth, upload.array('image'), validateCampground, WrapAsync(async (req, res, next) => {
-    if (!req.body.campground) throw new AppError(400, 'something went wrong')
+    if (!req.body.campground) throw new AppError('something went wrong', 400)
     const { id } = req.params
     const editComm = req.body.campground
     const camp = await CampGround.findByIdAndUpdate(id, editComm, { runValidators: true, new: true })

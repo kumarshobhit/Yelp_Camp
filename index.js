@@ -20,9 +20,8 @@ const campgroundRoutes = require('./routes/campgrounds.js')
 const reviewRoutes = require('./routes/reviews.js')
 const userRoutes = require('./routes/users.js')
 
-// const cloudDb = process.env.DB_ATLAS;
+
 const dbUrl = process.env.DB_URL || 'mongodb://localhost:27017/yelp-camp';
-// const dbUrl = 'mongodb://localhost:27017/yelp-camp';
 
 
 const MongoDBStore = require("connect-mongo")(session);
@@ -42,7 +41,17 @@ db.once("open", () => {
     console.log("Database connected");
 });
 
-const secret = process.env.SECRET || 'thisshouldbeabettersecret!';
+//  to parse form data
+app.use(express.urlencoded({ extended: true }));
+// to send patch/put request
+app.use(methodOverride('_method'))
+
+app.engine('ejs', ejsMate)
+app.set('view engine', 'ejs')
+app.set('views', path.join(__dirname, 'views'))
+app.use(express.static(path.join(__dirname, 'public')))
+
+const secret = process.env.DB_SECRET || 'thisshouldbeabettersecret!';
 
 const store = new MongoDBStore({
     url: dbUrl,
@@ -71,15 +80,6 @@ const sessionConfig = {
 app.use(session(sessionConfig));
 app.use(flash());
 
-//  to parse form data
-app.use(express.urlencoded({ extended: true }));
-// to send patch/put request
-app.use(methodOverride('_method'))
-
-app.engine('ejs', ejsMate)
-app.set('view engine', 'ejs')
-app.set('views', path.join(__dirname, 'views'))
-app.use(express.static(path.join(__dirname, 'public')))
 
 app.use(passport.initialize());
 app.use(passport.session());
@@ -100,14 +100,14 @@ app.use('/campgrounds', campgroundRoutes)
 app.use('/campgrounds/:id/reviews', reviewRoutes)
 app.use('/', userRoutes)
 
-// cloudinary.uploader.upload("my_image.jpg", function (error, result) { console.log(result, error) });
+
 
 app.get('/', (req, res) => {
     res.render('home')
 })
 
 app.all('*', (req, res, next) => {
-    next(new AppError(404, 'invalid request'))
+    next(new AppError('invalid request', 404))
 })
 
 
