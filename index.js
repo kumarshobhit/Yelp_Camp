@@ -107,7 +107,7 @@ app.get('/', (req, res) => {
 })
 
 app.all('*', (req, res, next) => {
-    next(new AppError('invalid request', 404))
+    next(new ExpressError('Page Not Found', 404))
 })
 
 
